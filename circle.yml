@@ -32,9 +32,9 @@ dependencies:
                  -v ${PWD}/.stack-work:${STACK_WORK}
                  -v ${PWD}/.release:${RELEASE_DIR}
                  -i ${DOCKER_REPO}dev
-                    cabal update &&
-                    stack install hlint packdeps &&
-                    stack build --fast --only-dependencies &&
+                    cabal update \&\&
+                    stack install hlint packdeps \&\&
+                    stack build --fast --only-dependencies \&\&
                     rm -fr $(stack path --dist-dir)
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp

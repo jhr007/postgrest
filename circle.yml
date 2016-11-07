@@ -27,11 +27,11 @@ dependencies:
     - if [[ -e ${DOCKER_CACHE}/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
     - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
     - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
-    - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    - docker run -v /root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 cabal update
-    - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    - docker run -v /root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack install --allow-different-user hlint packdeps
-    - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    - docker run -v /root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack build --allow-different-user --fast --only-dependencies
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
@@ -60,7 +60,7 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
+    - docker run -v /root/.stack -v ~/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
                     stack install --allow-different-user --local-bin-path ${RELEASE_DIR}
     - if [[ ! -e .release/postgrest ]]; then echo 'postgrest doesnt exist'; exit 1; fi
     - docker build --rm=false -f Dockerfile -t ${DOCKER_REPO} .

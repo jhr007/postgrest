@@ -2,22 +2,22 @@
 machine: 
   services:
     - docker
-  ghc: 
-    version: lts-7.4
+  # ghc: 
+  #   version: lts-7.4
 
   environment:
     DOCKER_REPO: jhr007/postgrest
     # Assumes empty tag means branch master, :latest
-    DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest} 
+    DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest}
     DOCKER_CACHE: $HOME/.docker
     RELEASE_DIR: .release
 
 dependencies:
   cache_directories:
-    # - "~/.stack"
     - "~/.docker"
-    # - ".stack-work"
     - ".release"
+    # - "~/.stack"
+    # - ".stack-work"
   override:
     - docker info
     # - if [[ -z CIRCLE_BRANCH ]]; 

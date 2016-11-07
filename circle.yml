@@ -29,8 +29,8 @@ dependencies:
     - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
     - docker run --rm
                  -v ~/.stack
-                 -v .stack-work:${STACK_WORK}
-                 -v .release:${RELEASE_DIR}
+                 -v ${PWD}/.stack-work:${STACK_WORK}
+                 -v ${PWD}/.release:${RELEASE_DIR}
                  -i ${DOCKER_REPO}dev
                     cabal update &&
                     stack install hlint packdeps &&
@@ -63,10 +63,11 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    - docker run -v .release:${RELEASE_DIR} \
-                 -v ~/.stack \
-                 -v .stack-work:${STACK_WORK} \
-                 ${DOCKER_REPO}dev \
+    - docker run --rm
+                 -v ${PWD}/.release:${RELEASE_DIR}
+                 -v ${PWD}/.stack-work:${STACK_WORK}
+                 -v ~/.stack
+                 -i ${DOCKER_REPO}dev
                     stack install --allow-different-user --local-bin-path ${RELEASE_DIR}
 
     - if [[ ! -e  ${RELEASE_DIR}/postgrest ]]; then exit 1; fi

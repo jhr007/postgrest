@@ -39,27 +39,27 @@ dependencies:
                 stack build --allow-different-user --fast
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack build --allow-different-user --fast --test --no-run-tests
-    # todo?? See build #33 Make sure Dist is cleaned before CircleCI Caches
-#    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-#                eval 'rm -fr $(stack path --dist-dir)'
 
-    # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
-    # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin
-    # - sudo apt-get update; sudo apt-get install --only-upgrade binutils
+
+
+## Not Yet carried to this circleci.yml
+
     # - createuser --superuser --no-password postgrest_test
     # - createdb -O postgrest_test -U ubuntu postgrest_test
 
+    # todo ?? Command fails...  build 33 ... subshells evaluated on circle host(should...) or inside docker?
+    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev /bin/bash
+    #             eval 'rm -fr $(stack path --dist-dir)'
+    # - rm -fr $(stack path --dist-dir) $(stack path --local-install-root)
 
-  # override:
-  #   - stack setup
-  #   - rm -fr $(stack path --dist-dir) $(stack path --local-install-root)
-  #   - stack install hlint packdeps cabal-install
-  #   - stack build --fast
-  #   - stack build --fast --test --no-run-tests
+
+    #   - stack install hlint packdeps cabal-install
+    #   - stack build --fast
+    #   - stack build --fast --test --no-run-tests
 
 test:
   override:
-    - echo "Tests go here.. "
+    - echo "Tests go here.. use stack's support for docker here?"
 #     - stack test --test-arguments "--skip \"returns a valid openapi\""
 #     - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
 #     - stack exec -- cabal update
@@ -71,6 +71,7 @@ test:
   post:
     - ls -al
     - du -sh . | sort -h
+    - lsdirs=(*); unset lsdirs[0]; unset lsdirs[1]; du -sh ${lsdirs[@]}
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
                     stack install --allow-different-user --local-bin-path ${RELEASE_DIR}
     - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi

@@ -12,11 +12,11 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN cabal update && \
-	stack install hlint packdeps && \
+    stack install hlint packdeps && \
     stack build --fast --only-dependencies && \
     rm -fr $(stack path --dist-dir)
 
-RUN	stack install --allow-different-user --local-bin-path /usr/local/bin  
+RUN stack install --allow-different-user --local-bin-path /usr/local/bin
 
 VOLUME ["${POSTGREST_SRC}/.stack-work", "${POSTGREST_OUT}", "/etc/postgrest"]
 

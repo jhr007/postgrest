@@ -1,8 +1,9 @@
 machine: 
-  ghc: 
-    version: lts-7.4
   services:
     - docker
+  ghc: 
+    version: lts-7.4
+
   environment:
     DOCKER_REPO: jhr007/postgrest
     # Assumes empty tag means branch master, :latest

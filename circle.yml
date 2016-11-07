@@ -27,15 +27,14 @@ dependencies:
     - if [[ -e ${DOCKER_CACHE}/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
     - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
     - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
-    - docker run --rm
-                 -v ~/.stack
-                 -v ${PWD}/.stack-work:${STACK_WORK}
-                 -v ${PWD}/.release:${RELEASE_DIR}
-                 -i ${DOCKER_REPO}dev
-                    cabal update \&\&
-                    stack install hlint packdeps \&\&
-                    stack build --fast --only-dependencies \&\&
-                    rm -fr $(stack path --dist-dir)
+    - docker run --rm -v ~/.stack -v ${PWD}/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
+                cabal update
+    - docker run --rm -v ~/.stack -v ${PWD}/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
+                stack install hlint packdeps
+    - docker run --rm -v ~/.stack -v ${PWD}/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
+                stack build --fast --only-dependencies
+
+
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
     # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin

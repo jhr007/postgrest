@@ -25,15 +25,23 @@ dependencies:
     # - if [[ -z CIRCLE_BRANCH ]];
     - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
     - if [[ -d .release ]]; then rm -rf .release; fi && mkdir -p .release
+
+    #Reuse docker image
     - if [[ -e ${DOCKER_CACHE}/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
     - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
     - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
+
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 cabal update
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack install --allow-different-user hlint packdeps
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                stack build --allow-different-user --fast --only-dependencies
+                stack build --allow-different-user --fast
+    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+                stack build --allow-different-user --fast --test --no-run-tests
+    # Make sure Dist is cleaned before CircleCI Caches
+    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+                eval 'rm -fr $(stack path --dist-dir)'
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
     # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin
@@ -61,9 +69,11 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
+    - ls -al
+    - du -sh . | sort -h
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
                     stack install --allow-different-user --local-bin-path ${RELEASE_DIR}
-    - if [[ ! -e .release/postgrest ]]; then echo 'postgrest doesnt exist'; exit 1; fi
+    - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
     - docker build --rm=false -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
     # - curl --retry 10 --retry-delay 5 -v http://localhost:3000

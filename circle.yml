@@ -1,27 +1,65 @@
+machine: 
+  ghc: 
+    version: lts-7.4
+  services:
+    - docker
+  environment:
+    DOCKER_REPO: jhr007/postgrest
+    # Assumes empty tag means branch master, :latest
+    DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest} 
+    DOCKER_CACHE: $HOME/.docker
+    RELEASE_DIR: .release
+
 dependencies:
   cache_directories:
-    - "~/.stack"
-    - ".stack-work"
-  pre:
-    - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
-    - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin
-    - sudo apt-get update; sudo apt-get install --only-upgrade binutils
-    - createuser --superuser --no-password postgrest_test
-    - createdb -O postgrest_test -U ubuntu postgrest_test
+    # - "~/.stack"
+    - "~/.docker"
+    # - ".stack-work"
+    - ".release"
   override:
-    - stack setup
-    - rm -fr $(stack path --dist-dir) $(stack path --local-install-root)
-    - stack install hlint packdeps cabal-install
-    - stack build --fast
-    - stack build --fast --test --no-run-tests
+    - docker info
+    # - if [[ -z CIRCLE_BRANCH ]]; 
+    - if [[ -e ${RELEASE_DIR} ]]; then rm -rf ${RELEASE_DIR}; fi && mkdir -p ${RELEASE_DIR};
+    - if [[ -e .docker/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
+    - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
+    - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
+
+    # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
+    # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin
+    # - sudo apt-get update; sudo apt-get install --only-upgrade binutils
+    # - createuser --superuser --no-password postgrest_test
+    # - createdb -O postgrest_test -U ubuntu postgrest_test
+
+
+  # override:
+  #   - stack setup
+  #   - rm -fr $(stack path --dist-dir) $(stack path --local-install-root)
+  #   - stack install hlint packdeps cabal-install
+  #   - stack build --fast
+  #   - stack build --fast --test --no-run-tests
 
 test:
   override:
-    - stack test --test-arguments "--skip \"returns a valid openapi\""
-    - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
-    - stack exec -- cabal update
-    - stack exec --no-ghc-package-path -- cabal install --only-d --dry-run
-    - stack exec -- packdeps *.cabal || true
-    - stack exec -- cabal check
-    - stack haddock --no-haddock-deps
-    - stack sdist
+    - echo "Tests go here.. "
+#     - stack test --test-arguments "--skip \"returns a valid openapi\""
+#     - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
+#     - stack exec -- cabal update
+#     - stack exec --no-ghc-package-path -- cabal install --only-d --dry-run
+#     - stack exec -- packdeps *.cabal || true
+#     - stack exec -- cabal check
+#     - stack  --no-haddock-deps
+#     - stack sdist
+  post: 
+    - docker run -v ${RELEASE_DIR} -v ~/.stack -v .stack-work:/srv/postgrest/.stack-work ${DOCKER_REPO}dev stack install --allow-different-user --local-bin-path ${RELEASE_DIR}  
+    - if [[ ! -e  ${RELEASE_DIR}/postgrest ]]; then exit 1; fi
+    - docker build -f Dockerfile -t ${DOCKER_REPO} .
+    # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
+    # - curl --retry 10 --retry-delay 5 -v http://localhost:3000
+
+# deployment:
+#   hub: 
+#     branch: master
+#     commands:
+#       - docker build -f Dockerfile -t ${DOCKER_REPO} .
+#       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+#       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

@@ -27,7 +27,7 @@ dependencies:
     - if [[ -e .docker/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
     - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
     - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
-    - docker run --rm
+    - docker run --rm \
                  -v ~/.stack \
                  -v .stack-work:${STACK_WORK} \
                  -v .release:${RELEASE_DIR}

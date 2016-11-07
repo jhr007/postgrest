@@ -39,9 +39,9 @@ dependencies:
                 stack build --allow-different-user --fast
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack build --allow-different-user --fast --test --no-run-tests
-    # Make sure Dist is cleaned before CircleCI Caches
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                eval 'rm -fr $(stack path --dist-dir)'
+    # todo?? See build #33 Make sure Dist is cleaned before CircleCI Caches
+#    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+#                eval 'rm -fr $(stack path --dist-dir)'
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
     # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin

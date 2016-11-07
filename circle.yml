@@ -32,7 +32,7 @@ dependencies:
     - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 stack install --allow-different-user hlint packdeps
     - docker run -v ~/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                stack build --fast --only-dependencies
+                stack build --allow-different-user --fast --only-dependencies
 
     # - curl -L https://github.com/commercialhaskell/stack/releases/download/v1.1.2/stack-1.1.2-linux-x86_64.tar.gz | tar zx -C /tmp
     # - sudo mv /tmp/stack-1.1.2-linux-x86_64/stack /usr/bin

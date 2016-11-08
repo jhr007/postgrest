@@ -25,6 +25,7 @@ dependencies:
     - ".release"
   override:
     - docker info
+    - sudo pip install docker-compose
     - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
     - if [[ -d .release ]]; then rm -rf .release; fi && mkdir -p .release
 

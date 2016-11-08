@@ -12,6 +12,7 @@ machine:
     POSTGREST_SRC: ${POSTGREST_SRC:-/srv/postgrest}
     RELEASE_DIR: ${POSTGREST_SRC}/.release
     STACK_WORK: ${POSTGREST_SRC}/.stack-work
+    DEPLOY_OWNER: ${DEPLOY_OWNER:-${CIRCLE_PROJECT_USERNAME:-jhr007}}
 
 dependencies:
   cache_directories:
@@ -81,8 +82,14 @@ test:
 deployment:
   hub:
     branch: /^master$/
-    # tag: /v*/
     commands:
-      # - docker build -f Dockerfile -t ${DOCKER_REPO} .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+
+  hub:
+    tag: /v*/
+    #required
+    owner: ${DEPLOY_OWNER}
+    commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

@@ -76,7 +76,7 @@ test:
 #     - stack sdist
   post:
     - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
-                    cp /usr/loca/bin/postgrest ${RELEASE_DIR}
+                    cp /usr/local/bin/postgrest ${RELEASE_DIR}
     - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
     - docker build --rm=false -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10

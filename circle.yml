@@ -23,6 +23,12 @@ dependencies:
     - "~/.stack-work"
     - "~/.docker"
     - ".release"
+  pre:
+    - sudo service docker stop
+    - sudo curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | sudo bash -s -- 1.10.0
+    - sudo pip install docker-compose
+    - sudo service docker start
+
   override:
     - docker info
     - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
@@ -32,6 +38,8 @@ dependencies:
     # TODO: cache busting strategy? change back to build each time?
     - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
     # - if [[ ! -e ~/.docker/image.tar ]]; then docker build -d -f Dockerfile.development -t ${DOCKER_REPO}dev . ; fi
+
+    # TODO: Try running with --rm=false instead of -d(detach)
     - docker-compose run -d development cabal update
     - docker-compose run -d development stack install hlint packdeps
     - docker-compose run -d development stack build --allow-different-user --fast

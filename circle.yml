@@ -36,12 +36,12 @@ dependencies:
     - docker-compose run -d development stack install hlint packdeps
     - docker-compose run -d development stack build --allow-different-user --fast
     - docker-compose run -d development stack build --allow-different-user --fast --test --no-run-tests
-    - docker-compose run -d development rm -fr $$(stack path --dist-dir)
+    - docker-compose run -d development rm -fr \$(stack path --dist-dir)
     - docker-compose run -d development --name tmpcontainer stack install --allow-different-user --local-bin-path /usr/local/bin
 
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save $(docker inspect --format='{{.Image}}' tmpcontainer ) > ~/.docker/image.tar ; fi
 
-    # Can't be done in Dockerfile because we can't cache the
+    # Can't be done in Dockerfile#RUN because we can't cache stack deps in circleci cache
     # Script? Makefile?
     # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
     #             cabal update

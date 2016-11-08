@@ -7,6 +7,5 @@ development:
     - ./.release:/srv/postgrest/.release
     - ${HOME}/.stack-work:/srv/postgrest/.stack-work
     - ${HOME}/.stack:/root/.stack
-  entrypoint: stack install --allow-different-user --local-bin-path /srv/postgrest/.release
 release:
   build: .

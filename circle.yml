@@ -31,13 +31,13 @@ dependencies:
     # Reuse docker image...
     # TODO: cache busting strategy? change back to build each time?
     - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
-    # - if [[ ! -e ~/.docker/image.tar ]]; then docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev . ; fi
-    - docker-compose run development cabal update
-    - docker-compose run development stack install hlint packdeps
-    - docker-compose run development stack build --allow-different-user --fast
-    - docker-compose run development stack build --allow-different-user --fast --test --no-run-tests
-    - docker-compose run development rm -fr $$(stack path --dist-dir)
-    - docker-compose run development --name tmpcontainer stack install --allow-different-user --local-bin-path /usr/local/bin
+    # - if [[ ! -e ~/.docker/image.tar ]]; then docker build --rm=False -f Dockerfile.development -t ${DOCKER_REPO}dev . ; fi
+    - docker-compose run --rm=False development cabal update
+    - docker-compose run --rm=False development stack install hlint packdeps
+    - docker-compose run --rm=False development stack build --allow-different-user --fast
+    - docker-compose run --rm=False development stack build --allow-different-user --fast --test --no-run-tests
+    - docker-compose run --rm=False development rm -fr $$(stack path --dist-dir)
+    - docker-compose run --rm=False development --name tmpcontainer stack install --allow-different-user --local-bin-path /usr/local/bin
 
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save $(docker inspect --format='{{.Image}}' tmpcontainer ) > ~/.docker/image.tar ; fi
 
@@ -81,12 +81,12 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    - docker-compose run stack install --allow-different-user --local-bin-path $RELEASE_DIR
+    - docker-compose run --rm=False stack install --allow-different-user --local-bin-path $RELEASE_DIR
     - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
     - docker-compose build release
     # - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
     #                 cp /usr/local/bin/postgrest ${RELEASE_DIR}
-    # - docker build --rm=false -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
+    # - docker build --rm=False -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
     # - curl --retry 10 --retry-delay 5 -v http://localhost:3000
 

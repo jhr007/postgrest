@@ -81,7 +81,7 @@ test:
 deployment:
   hub:
     branch: /^master$/
-    tag: /v*/
+    # tag: /v*/
     commands:
       # - docker build -f Dockerfile -t ${DOCKER_REPO} .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS

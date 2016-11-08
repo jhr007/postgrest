@@ -1,5 +1,7 @@
 FROM fpco/stack-build:lts-7.4
 
+LABEL postgrestdev
+
 ENV POSTGREST_SRC ${POSTGREST_SRC:-/srv/postgrest}
 
 ENV RELEASE_DIR ${RELEASE_DIR:-${POSTGREST_SRC}.release}
@@ -8,17 +10,15 @@ WORKDIR ${POSTGREST_SRC}
 
 COPY . ${POSTGREST_SRC}
 
-RUN apt-get update && \
-    apt-get install -y libpq-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN scripts/install_libpq.sh
 
-RUN cabal update && \
-    stack install hlint packdeps && \
-    stack build --allow-different-user --fast && \
-    stack build --allow-different-user --fast --test --no-run-tests && \
-    rm -fr $(stack path --dist-dir)
+# RUN cabal update && \
+#     stack install hlint packdeps && \
+#     stack build --allow-different-user --fast && \
+#     stack build --allow-different-user --fast --test --no-run-tests && \
+#     rm -fr $(stack path --dist-dir)
 
-RUN stack install --allow-different-user --local-bin-path /usr/local/bin
+# RUN stack install --allow-different-user --local-bin-path /usr/local/bin
 
 VOLUME ["${POSTGREST_SRC}", "/etc/postgrest", "/root/.stack", "${POSTGREST_SRC}/.stack-work"]
 

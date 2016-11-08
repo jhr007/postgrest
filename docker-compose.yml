@@ -1,7 +1,8 @@
 development:
-  image: ${DOCKER_REPO}dev
   build: .
   dockerfile: Dockerfile.development
+  labels:
+    postgrestdev: ""
   volumes:
     - ./.release:/srv/postgrest/.release
     - ${HOME}/.stack-work:/srv/postgrest/.stack-work

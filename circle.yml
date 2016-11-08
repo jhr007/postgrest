@@ -9,7 +9,6 @@ machine:
     DOCKER_REPO: jhr007/postgrest
     # Assumes empty tag means branch master, :latest
     DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest}
-    DOCKER_CACHE: ~/.docker
     POSTGREST_SRC: ${POSTGREST_SRC:-/srv/postgrest}
     RELEASE_DIR: ${POSTGREST_SRC}/.release
     STACK_WORK: ${POSTGREST_SRC}/.stack-work
@@ -27,9 +26,9 @@ dependencies:
     - if [[ -d .release ]]; then rm -rf .release; fi && mkdir -p .release
 
     #Reuse docker image
-    - if [[ -e ${DOCKER_CACHE}/image.tar ]]; then docker load --input ${DOCKER_CACHE}/image.tar; fi
+    - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
     - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
-    - mkdir -p ${DOCKER_CACHE}; docker save ${DOCKER_REPO}dev > ${DOCKER_CACHE}/image.tar
+    - mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar
 
     - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
                 cabal update

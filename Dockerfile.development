@@ -1,6 +1,6 @@
 FROM fpco/stack-build:lts-7.4
 
-LABEL postgrestdev
+LABEL postgrestdev yes
 
 ENV POSTGREST_SRC ${POSTGREST_SRC:-/srv/postgrest}
 

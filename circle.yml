@@ -1,4 +1,8 @@
 ---
+general:
+  artifacts:
+    - ".release/postgrest"
+
 machine:
   services:
     - docker
@@ -88,7 +92,7 @@ deployment:
 
   release:
     tag: /^v[0-9]+(\.[0-9]+)*/
-    owner: ${DEPLOY_OWNER}
+    owner: jhr007
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

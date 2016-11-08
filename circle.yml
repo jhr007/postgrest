@@ -82,14 +82,14 @@ test:
 deployment:
   hub:
     branch: /^master$/
-    commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
-
-  hub:
-    tag: /v*/
-    #required
+    tag: /^v.*/
     owner: ${DEPLOY_OWNER}
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+
+  # hub:
+  #   #required
+  #   commands:
+  #     - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+  #     - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

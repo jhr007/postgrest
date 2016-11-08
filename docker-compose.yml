@@ -10,4 +10,3 @@ development:
   entrypoint: stack install --allow-different-user --local-bin-path /srv/postgrest/.release
 release:
   build: .
-  image: ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

@@ -15,13 +15,12 @@ machine:
     DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest}
     POSTGREST_SRC: ${POSTGREST_SRC:-/srv/postgrest}
     RELEASE_DIR: ${POSTGREST_SRC}/.release
-    STACK_WORK: ${POSTGREST_SRC}/.stack-work
-    DEPLOY_OWNER: ${DEPLOY_OWNER:-${CIRCLE_PROJECT_USERNAME:-jhr007}}
+    # STACK_WORK: ${POSTGREST_SRC}/.stack-work
 
 dependencies:
   cache_directories:
-    - "~/.stack"
-    - "~/.stack-work"
+    # - "~/.stack"
+    # - "~/.stack-work"
     - "~/.docker"
     - ".release"
   override:
@@ -30,19 +29,22 @@ dependencies:
     - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
     - if [[ -d .release ]]; then rm -rf .release; fi && mkdir -p .release
 
-    #Reuse docker image
+    # Reuse docker image...
+    # TODO: cache busting strategy? change back to build each time?
     - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
-    - docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev .
-    - mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar
+    - if [[ ! -e ~/.docker/image.tar ]]; then docker build --rm=false -f Dockerfile.development -t ${DOCKER_REPO}dev . ; fi
+    - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar ; fi
 
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                cabal update
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                stack install --allow-different-user hlint packdeps
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                stack build --allow-different-user --fast
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
-                stack build --allow-different-user --fast --test --no-run-tests
+    # Can't be done in Dockerfile because we can't cache the
+    # Script? Makefile?
+    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    #             cabal update
+    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    #             stack install --allow-different-user hlint packdeps
+    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    #             stack build --allow-different-user --fast
+    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev
+    #             stack build --allow-different-user --fast --test --no-run-tests
 
 
 
@@ -73,24 +75,21 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    - ls -al
-    - du -sh . | sort -h
-    - lsdirs=(*); unset lsdirs[0]; unset lsdirs[1]; du -sh ${lsdirs[@]}
-    - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
-                    stack install --allow-different-user --local-bin-path ${RELEASE_DIR}
+    - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
+                    cp /usr/loca/bin/postgrest ${RELEASE_DIR}
     - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
     - docker build --rm=false -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
     # - curl --retry 10 --retry-delay 5 -v http://localhost:3000
 
 deployment:
-  hub:
-    branch: /^master$/
+  dockerhub_latest:
+    branch: master
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
 
-  release:
+  dockerhub_tag:
     tag: /^v[0-9]+(\.[0-9]+)*/
     owner: jhr007
     commands:

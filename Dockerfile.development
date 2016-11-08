@@ -12,13 +12,14 @@ RUN apt-get update && \
     apt-get install -y libpq-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# RUN cabal update && \
-#     stack install hlint packdeps && \
-#     stack build --fast --only-dependencies && \
-#     rm -fr $(stack path --dist-dir)
+RUN cabal update && \
+    stack install hlint packdeps && \
+    stack build --allow-different-user --fast && \
+    stack build --allow-different-user --fast --test --no-run-tests && \
+    rm -fr $(stack path --dist-dir)
 
-# RUN stack install --allow-different-user --local-bin-path /usr/local/bin
+RUN stack install --allow-different-user --local-bin-path /usr/local/bin
 
-VOLUME ["${POSTGREST_SRC}", "/etc/postgrest"]
+VOLUME ["${POSTGREST_SRC}", "/etc/postgrest", "/root/.stack", "${POSTGREST_SRC}/.stack-work"]
 
 CMD [ "/usr/local/bin/postgrest", "-c", "/etc/postgrest/postgrest.conf"]

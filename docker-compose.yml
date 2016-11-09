@@ -1,11 +1,14 @@
-development:
-  build: .
-  dockerfile: Dockerfile.development
-  labels:
-    postgrestdev: ""
-  volumes:
-    - ./.release:/srv/postgrest/.release
-    - ${HOME}/.stack-work:/srv/postgrest/.stack-work
-    - ${HOME}/.stack:/root/.stack
-release:
-  build: .
+version: '2'
+services:
+  development:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    image: postgrestdev
+    volumes:
+      - ./.release:/srv/postgrest/.release
+      - ${HOME}/.stack-work:/srv/postgrest/.stack-work
+      - ${HOME}/.stack:/root/.stack
+  release:
+    build: .
+    image: ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}

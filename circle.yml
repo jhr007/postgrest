@@ -39,11 +39,11 @@ dependencies:
     # - if [[ ! -e ~/.docker/image.tar ]]; then docker build -d -f Dockerfile.development -t ${DOCKER_REPO}dev . ; fi
 
     # TODO: Try running with --rm=false instead of -d(detach)
-    - docker-compose run -d development cabal update
-    - docker-compose run -d development stack install hlint packdeps
-    - docker-compose run -d development stack build --allow-different-user --fast
-    - docker-compose run -d development stack build --allow-different-user --fast --test --no-run-tests
-    - docker-compose run -d development 'rm -fr $$(stack path --dist-dir)'
+    - docker-compose run development cabal update
+    - docker-compose run development stack install hlint packdeps
+    - docker-compose run development stack build --allow-different-user --fast
+    - docker-compose run development stack build --allow-different-user --fast --test --no-run-tests
+    - docker-compose run development 'set -x; rm -fr $$(stack path --dist-dir)'
     - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
 
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save $(docker inspect --format='{{.Image}}' tmpcontainer ) > ~/.docker/image.tar ; fi

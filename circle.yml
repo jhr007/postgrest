@@ -25,13 +25,14 @@ dependencies:
   cache_directories:
     # - "~/.stack"
     # - "~/.stack-work"
+    # - "~/.cabal"
     - "~/.docker"
     # - ".release"
 
   override:
     - docker info
     - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
-    - if [[ -d .release ]]; then rm -rf .release; fi && mkdir -p .release
+    - if [[ -d .release ]]; then rm -rf .release; fi; mkdir -p .release
 
     # Reuse docker image...
     # TODO: cache busting strategy? change back to build each time?
@@ -44,10 +45,9 @@ dependencies:
     # - docker-compose run development stack build --allow-different-user --fast --test --no-run-tests
     # # - docker-compose run development 'rm -fr $(stack path --dist-dir)'
     # - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
-    - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
+    - docker-compose build development
 
-    - exit 1;
-
+    # - mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar ; fi
 
 ## Not Yet carried to this circleci.yml
@@ -72,7 +72,7 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    # - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
+    - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
     - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
     - docker-compose build release
     # - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
@@ -88,7 +88,7 @@ deployment:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
 
-  dockerhub_tag:
+  dockerhub_vtag:
     tag: /^v[0-9]+(\.[0-9]+)*/
     owner: jhr007
     commands:

@@ -26,7 +26,7 @@ dependencies:
     # - "~/.stack"
     # - "~/.stack-work"
     - "~/.docker"
-    - ".release"
+    # - ".release"
 
   override:
     - docker info
@@ -46,7 +46,7 @@ dependencies:
     # - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
     - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
 
-    exit 1;
+    - exit 1;
 
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar ; fi
 

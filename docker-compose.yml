@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.development
-    image: postgrestdev
+    image: ${DOCKER_REPO}dev
     volumes:
       - ./.release:/srv/postgrest/.release
       # - ${HOME}/.stack-work:/srv/postgrest/.stack-work

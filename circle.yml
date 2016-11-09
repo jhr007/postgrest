@@ -36,7 +36,6 @@ dependencies:
     # Reuse docker image...
     # TODO: cache busting strategy? change back to build each time?
     - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
-    - exit 1
 
     # Docker-compose doesn't accept --rm=false, CircleCI created docker images can't be deleted
     # - docker-compose run development cabal update
@@ -47,7 +46,9 @@ dependencies:
     # - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
     - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
 
-    - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save $(docker inspect --format='{{.Image}}' tmpcontainer ) > ~/.docker/image.tar ; fi
+    exit 1;
+
+    - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar ; fi
 
 ## Not Yet carried to this circleci.yml
 

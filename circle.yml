@@ -43,7 +43,7 @@ dependencies:
     - docker-compose run development stack install --allow-different-user hlint packdeps
     - docker-compose run development stack build --allow-different-user --fast
     - docker-compose run development stack build --allow-different-user --fast --test --no-run-tests
-    - docker-compose run development 'set -x; rm -fr $$(stack path --dist-dir)'
+    # - docker-compose run development 'set -x; rm -fr $(stack path --dist-dir)'
     - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
 
     - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save $(docker inspect --format='{{.Image}}' tmpcontainer ) > ~/.docker/image.tar ; fi

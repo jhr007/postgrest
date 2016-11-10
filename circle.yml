@@ -58,6 +58,6 @@ deployment:
 
   dockerhub_vtag:
     tag: /^v[0-9]+(\.[0-9]+)*/
-    owner: $CIRCLE_PROJECT_USERNAME
+    owner: jhr007
     commands:
       - scripts/docker_push.sh

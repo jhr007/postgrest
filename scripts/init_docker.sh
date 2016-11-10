@@ -8,7 +8,7 @@ if [[ -e ~/.docker/image.tar ]]; then
 
   echo "${AGE} < ${MAX_CACHE_AGE}";
   if [[ $AGE -lt $MAX_CACHE_AGE ]]; then
-    echo "Loading image from tar..";
+    echo "Loading image from tar...";
     docker load --input ~/.docker/image.tar;
     docker images -a --digests;
   else
@@ -21,6 +21,8 @@ if [[ ! -e ~/.docker/image.tar ]]; then
   echo "Building image..."
   docker-compose build development;
   docker images -a --digests;
+
+  echo "Building Complete.";
 
   mkdir -p ~/.docker;
   echo "Saving image..."

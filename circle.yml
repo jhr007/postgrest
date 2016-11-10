@@ -26,6 +26,7 @@ dependencies:
   override:
     - docker info
     - mkdir -p .release
+    - mkdir -p .docker
     - scripts/init_docker.sh
 
     ## Not Yet carried to this circleci.yml
@@ -53,10 +54,10 @@ deployment:
   dockerhub_latest:
     branch: master
     commands:
-      - ./scripts/docker_push.sh
+      - scripts/docker_push.sh
 
   dockerhub_vtag:
     tag: /^v[0-9]+(\.[0-9]+)*/
     owner: $CIRCLE_PROJECT_USERNAME
     commands:
-      - ./scripts/docker_push.sh
+      - scripts/docker_push.sh

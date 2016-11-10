@@ -14,7 +14,7 @@ machine:
 
   environment:
     DOCKER_REPO: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
-    # Assumes empty tag means branch master, :latest
+    # Assumes an empty tag means master branch, e.g. latest release
     DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest}
     POSTGREST_SRC: ${POSTGREST_SRC:-/srv/postgrest}
     RELEASE_DIR: ${POSTGREST_SRC}/.release
@@ -36,17 +36,18 @@ dependencies:
 test:
   override:
     - echo "Tests go here.. use stack's support for docker here?"
-#     - stack test --test-arguments "--skip \"returns a valid openapi\""
-#     - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
-#     - stack exec -- cabal update
-#     - stack exec --no-ghc-package-path -- cabal install --only-d --dry-run
-#     - stack exec -- packdeps *.cabal || true
-#     - stack exec -- cabal check
-#     - stack  --no-haddock-deps
-#     - stack sdist
+    - docker-compose run --no-deps development scripts/run_tests.sh
+    # - stack test --test-arguments "--skip \"returns a valid openapi\""
+    # - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
+    # - stack exec -- cabal update
+    # - stack exec --no-ghc-package-path -- cabal install --only-d --dry-run
+    # - stack exec -- packdeps *.cabal || true
+    # - stack exec -- cabal check
+    # - stack  --no-haddock-deps
+    # - stack sdist
   post:
     - docker-compose run --no-deps development stack install --allow-different-user --local-bin-path $RELEASE_DIR
-    - if [[ -e .release/postgrest ]]; then echo 'Exists..'; docker-compose build release; else exit 1; fi
+    - if [[ -e .release/postgrest ]]; then echo 'Postgrest binary exists..'; docker-compose build release; else echo "Postgrest binary does NOT exist"; exit 1; fi
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
     # - curl --retry 10 --retry-delay 5 -v http://localhost:3000
 

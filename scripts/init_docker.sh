@@ -3,7 +3,7 @@ MAX_CACHE_AGE=604800 # seconds
 DOCKER_REPO=${DOCKER_REPO:-postgrest}
 
 if [[ -e ~/.docker/image.tar ]]; then
-  let "AGE=$(date +%s) - $(date --date=$(docker inspect -f={{.Created}} ${DOCKER_REPO}dev) +%s)";
+  let "AGE=$(date +%s) - $(stat -c %Y ~/.docker/image.tar)";
 
   echo "${AGE} < ${MAX_CACHE_AGE}";
   if [[ $AGE -lt $MAX_CACHE_AGE ]]; then

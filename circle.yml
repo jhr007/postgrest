@@ -72,9 +72,9 @@ test:
 #     - stack  --no-haddock-deps
 #     - stack sdist
   post:
-    - docker-compose run development stack install --allow-different-user --local-bin-path $RELEASE_DIR
-    - if [[ ! -e .release/postgrest ]]; then echo '.release/postgrest doesnt exist'; exit 1; fi
-    - docker-compose build release
+    - docker-compose run --no-deps development stack install --allow-different-user --local-bin-path $RELEASE_DIR
+    - if [[ -e .release/postgrest ]]; then echo 'Exists..'; docker-compose build release; else exit 1; fi
+    -
     # - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
     #                 cp /usr/local/bin/postgrest ${RELEASE_DIR}
     # - docker build -d -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .

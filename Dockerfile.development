@@ -4,7 +4,7 @@ LABEL postgrestdev yes
 
 ENV POSTGREST_SRC ${POSTGREST_SRC:-/srv/postgrest}
 
-ENV RELEASE_DIR ${RELEASE_DIR:-${POSTGREST_SRC}.release}
+ENV RELEASE_DIR ${RELEASE_DIR:-${POSTGREST_SRC}/.release}
 
 WORKDIR ${POSTGREST_SRC}
 
@@ -13,7 +13,7 @@ COPY . ${POSTGREST_SRC}
 RUN scripts/install_libpq.sh
 
 RUN cabal update && \
-    stack install hlint packdeps && \
+    stack install --allow-different-user hlint packdeps && \
     stack build --allow-different-user --fast && \
     stack build --allow-different-user --fast --test --no-run-tests && \
     rm -fr $(stack path --dist-dir)

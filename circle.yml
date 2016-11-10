@@ -5,64 +5,33 @@ general:
 
 machine:
   pre:
+    # Update Docker & Docker-Compose
     - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | sudo bash -s -- 1.10.0
     - pip install docker-compose
 
   services:
     - docker
-  # ghc:
-  #   version: lts-7.4
 
   environment:
-    DOCKER_REPO: jhr007/postgrest
+    DOCKER_REPO: ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     # Assumes empty tag means branch master, :latest
     DOCKER_IMAGE_TAG: ${CIRCLE_TAG:-latest}
     POSTGREST_SRC: ${POSTGREST_SRC:-/srv/postgrest}
     RELEASE_DIR: ${POSTGREST_SRC}/.release
-    # STACK_WORK: ${POSTGREST_SRC}/.stack-work
 
 dependencies:
   cache_directories:
-    # - "~/.stack"
-    # - "~/.stack-work"
-    # - "~/.cabal"
     - "~/.docker"
-    # - ".release"
 
   override:
     - docker info
-    - if [[ ! -d ~/.stack ]]; then mkdir -p ~/.stack; fi
-    - if [[ -d .release ]]; then rm -rf .release; fi; mkdir -p .release
+    - mkdir -p .release
+    - scripts/init_docker.sh
 
-    # Reuse docker image...
-    # TODO: cache busting strategy? change back to build each time?
-    - if [[ -e ~/.docker/image.tar ]]; then docker load --input ~/.docker/image.tar; fi
-    - docker images -a --digests
-
-    # Docker-compose doesn't accept --rm=false, CircleCI created docker images can't be deleted
-    # - docker-compose run development cabal update
-    # - docker-compose run development stack install --allow-different-user hlint packdeps
-    # - docker-compose run development stack build --allow-different-user --fast
-    # - docker-compose run development stack build --allow-different-user --fast --test --no-run-tests
-    # # - docker-compose run development 'rm -fr $(stack path --dist-dir)'
-    # - docker-compose run --name tmpcontainer -d development stack install --allow-different-user --local-bin-path /usr/local/bin
-    - if [[ ! -e ~/.docker/image.tar ]]; then docker-compose build development; fi
-    - docker images -a --digests
-
-    # - mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar
-    - if [[ ! -e ~/.docker/image.tar ]]; then mkdir -p ~/.docker; docker save ${DOCKER_REPO}dev > ~/.docker/image.tar ; fi
-    - docker images -a --digests
-
-## Not Yet carried to this circleci.yml
+    ## Not Yet carried to this circleci.yml
 
     # - createuser --superuser --no-password postgrest_test
     # - createdb -O postgrest_test -U ubuntu postgrest_test
-
-    # todo ?? Command fails...  build 33 ... subshells evaluated on circle host(should...) or inside docker?
-    # - docker run -v ~/.stack:/root/.stack -v ~/.stack-work:${STACK_WORK} -i ${DOCKER_REPO}dev /bin/bash
-    #             eval 'rm -fr $(stack path --dist-dir)'
-    # - rm -fr $(stack path --dist-dir) $(stack path --local-install-root)
-
 test:
   override:
     - echo "Tests go here.. use stack's support for docker here?"
@@ -77,9 +46,6 @@ test:
   post:
     - docker-compose run --no-deps development stack install --allow-different-user --local-bin-path $RELEASE_DIR
     - if [[ -e .release/postgrest ]]; then echo 'Exists..'; docker-compose build release; else exit 1; fi
-    # - docker run -v ${PWD}/.release:${RELEASE_DIR} -i ${DOCKER_REPO}dev
-    #                 cp /usr/local/bin/postgrest ${RELEASE_DIR}
-    # - docker build -d -f Dockerfile -t ${DOCKER_REPO}:${DOCKER_IMAGE_TAG} .
     # - docker run -d -p 3000:3000 ${DOCKER_REPO}; sleep 10
     # - curl --retry 10 --retry-delay 5 -v http://localhost:3000
 
@@ -87,12 +53,10 @@ deployment:
   dockerhub_latest:
     branch: master
     commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+      - ./scripts/docker_push.sh
 
   dockerhub_vtag:
     tag: /^v[0-9]+(\.[0-9]+)*/
-    owner: jhr007
+    owner: $CIRCLE_PROJECT_USERNAME
     commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+      - ./scripts/docker_push.sh

@@ -31,8 +31,8 @@ dependencies:
     - docker info
     - mkdir -p .release
     - mkdir -p .docker
-    # - scripts/init_docker.sh
-    - scripts/install_deps.sh
+    - scripts/init_docker.sh
+    # - scripts/install_deps.sh
 
     # Setup database for tests
     - createuser --superuser --no-password postgrest_test

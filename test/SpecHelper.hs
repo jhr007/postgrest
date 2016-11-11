@@ -7,6 +7,7 @@ import Data.CaseInsensitive (CI(..))
 import Data.List (lookup)
 import Text.Regex.TDFA ((=~))
 import qualified Data.ByteString.Char8 as BS
+import System.Environment
 import System.Process (readProcess)
 
 import PostgREST.Config (AppConfig(..))
@@ -47,7 +48,8 @@ validateOpenApiResponse headers = do
        D4.fetchFilesystemAndValidate schemaContext ((fromJust . decode) respBody) `shouldReturn` Right ()
 
 testDbConn :: Text
-testDbConn = "postgres://postgrest_test_authenticator@localhost:5432/postgrest_test"
+host= getEnv "DB_HOST"
+testDbConn = "postgres://postgrest_test_authenticator@" ++ host ++ ":5432/postgrest_test"
 
 testCfg :: AppConfig
 testCfg =

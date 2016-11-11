@@ -10,7 +10,7 @@ WORKDIR ${POSTGREST_SRC}
 
 COPY . ${POSTGREST_SRC}
 
-RUN scripts/install_libpq.sh
+RUN scripts/install_deps.sh
 
 RUN cabal update && \
     stack install --allow-different-user hlint packdeps && \

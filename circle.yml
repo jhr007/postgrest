@@ -22,21 +22,25 @@ machine:
 dependencies:
   cache_directories:
     - "~/.docker"
+    # - "~/.stack"
+    # - "~/.stack"
+    # - ".stack-work"
+    # - ".release"
 
-  override:
+  post:
     - docker info
     - mkdir -p .release
     - mkdir -p .docker
-    - scripts/init_docker.sh
+    # - scripts/init_docker.sh
+    - scripts/install_deps.sh
 
-    ## Not Yet carried to this circleci.yml
-
-    # - createuser --superuser --no-password postgrest_test
-    # - createdb -O postgrest_test -U ubuntu postgrest_test
+    # Setup database for tests
+    - createuser --superuser --no-password postgrest_test
+    - createdb -O postgrest_test -U ubuntu postgrest_test
 test:
   override:
-    - echo "Tests go here.. use stack's support for docker here?"
-    - docker-compose run --no-deps development scripts/run_tests.sh
+    - echo "Beginning tests..."
+    - docker-compose run -e DB_HOST=${HOSTNAME} --no-deps development scripts/run_tests.sh
     # - stack test --test-arguments "--skip \"returns a valid openapi\""
     # - git ls-files | grep '\.l\?hs$' | xargs stack exec -- hlint -X QuasiQuotes -X NoPatternSynonyms "$@"
     # - stack exec -- cabal update

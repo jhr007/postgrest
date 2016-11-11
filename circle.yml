@@ -27,7 +27,7 @@ dependencies:
     # - ".stack-work"
     # - ".release"
 
-  post:
+  override:
     - docker info
     - mkdir -p .release
     - mkdir -p .docker

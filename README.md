@@ -126,6 +126,13 @@ See examples of [PostgreSQL
 constraints](http://www.tutorialspoint.com/postgresql/postgresql_constraints.htm)
 and the [guide to routing](http://postgrest.com/api/reading/).
 
+### Docker
+
+```
+docker pull begriffs/postgrest:latest
+docker run -v /config/path/on/host:/etc/postgrest begriffs/postgrest:latest
+```
+
 ### Thanks
 
 I'm grateful to the generous project

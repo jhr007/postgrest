@@ -39,6 +39,7 @@ dependencies:
     - cabal --version
     - stack --version
     - ghc --version
+    - psql --version
 
     - mkdir -p .release
 
